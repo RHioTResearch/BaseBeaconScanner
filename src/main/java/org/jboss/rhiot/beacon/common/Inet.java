@@ -36,6 +36,26 @@ public class Inet {
     }
 
     /**
+     * Obtain the host IP address and mac address
+     * @param hostIPAddress - the host ip dot decimal address as a char[]
+     * @param macaddr - the host interface mac address as a hex char[]
+     * @throws SocketException
+     */
+    public static void getHostInfo(char hostIPAddress[], char macaddr[]) throws SocketException {
+        List<InterfaceConfig> ifaces = getAllAddress();
+        // Just use the first interface
+        for (InterfaceConfig config : ifaces) {
+            if(config.getAddressList().size() > 0) {
+                char[] mac = config.getMacaddr().toCharArray();
+                System.arraycopy(mac, 0, macaddr, 0, mac.length);
+                InterfaceAddress host = config.getAddressList().get(0);
+                char[] ip = host.getAddress().getHostAddress().toCharArray();
+                System.arraycopy(ip, 0, hostIPAddress, 0, ip.length);
+            }
+        }
+    }
+
+    /**
      * Return a list of all NetworkInterface hardware addresses in %x:%x:%x:%x:%x:%x format
      *
      * @return NetworkInterface hardware addresses

@@ -1,8 +1,8 @@
 package org.jboss.rhiot.beacon.scannerjni;
 
-import com.beust.jcommander.JCommander;
 import org.jboss.logging.Logger;
 import org.jboss.rhiot.beacon.bluez.HCIDump;
+import org.jboss.rhiot.beacon.common.Inet;
 import org.jboss.rhiot.beacon.common.ParseCommand;
 
 import java.net.SocketException;
@@ -21,16 +21,10 @@ public class Main {
         ParseCommand cmdArgs = ParseCommand.parseArgs(args);
 
         // If scannerID is the string {IP}, replace it with the host IP address
-        String scannerID = cmdArgs.scannerID;
-        if(scannerID.compareTo("{IP}") == 0) {
-            char hostIPAddress[] = new char[128];
-            char macaddr[] = new char[32];
-            try {
-                HealthStatus.getHostInfo(hostIPAddress, macaddr);
-                cmdArgs.scannerID = new String(hostIPAddress);
-            } catch (SocketException e) {
-                log.warn("Failed to read host address info", e);
-            }
+        try {
+            cmdArgs.replaceScannerID();
+        } catch (SocketException e) {
+            log.warn("Failed to read host address info", e);
         }
 
         HCIDumpParser parser = new HCIDumpParser(cmdArgs);

@@ -10,10 +10,8 @@ import org.jboss.rhiot.beacon.common.StatusProperties;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InterfaceAddress;
 import java.net.SocketException;
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -97,20 +95,6 @@ public class HealthStatus {
     public void stop() {
         running = false;
         monitorThread.interrupt();
-    }
-
-    public static void getHostInfo(char hostIPAddress[], char macaddr[]) throws SocketException {
-        List<Inet.InterfaceConfig> ifaces = Inet.getAllAddress();
-        // Just use the first interface
-        for (Inet.InterfaceConfig config : ifaces) {
-            if(config.getAddressList().size() > 0) {
-                char[] mac = config.getMacaddr().toCharArray();
-                System.arraycopy(mac, 0, macaddr, 0, mac.length);
-                InterfaceAddress host = config.getAddressList().get(0);
-                char[] ip = host.getAddress().getHostAddress().toCharArray();
-                System.arraycopy(ip, 0, hostIPAddress, 0, ip.length);
-            }
-        }
     }
 
     public static String determineSystemType() {
@@ -201,7 +185,7 @@ public class HealthStatus {
         char hostIPAddress[] = new char[128];
         char macaddr[] = new char[32];
         try {
-            getHostInfo(hostIPAddress, macaddr);
+            Inet.getHostInfo(hostIPAddress, macaddr);
         } catch (SocketException e) {
             log.warn("Failed to read host address info", e);
         }

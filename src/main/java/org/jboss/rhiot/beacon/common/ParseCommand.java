@@ -12,6 +12,7 @@ package org.jboss.rhiot.beacon.common;/*
  * limitations under the License.
  */
 
+import java.net.SocketException;
 import java.util.List;
 
 import com.beust.jcommander.JCommander;
@@ -204,6 +205,17 @@ public class ParseCommand {
         return bcastPort;
     }
 
+    /**
+     * If scannerID is the string {IP}, replace it with the host IP address
+     */
+    public void replaceScannerID() throws SocketException {
+        if(scannerID.compareTo("{IP}") == 0) {
+            char hostIPAddress[] = new char[128];
+            char macaddr[] = new char[32];
+                Inet.getHostInfo(hostIPAddress, macaddr);
+                scannerID = new String(hostIPAddress);
+        }
+    }
     public static ParseCommand parseArgs(List<String> args) {
         String[] argsArray = new String[args.size()];
         args.toArray(argsArray);
