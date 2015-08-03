@@ -18,9 +18,7 @@ public class Main {
         System.loadLibrary("scannerJni");
         log.info("Loaded native scannerJni library");
 
-        ParseCommand cmdArgs = new ParseCommand();
-        JCommander cmdArgParser = new JCommander(cmdArgs);
-        cmdArgParser.parse(args);
+        ParseCommand cmdArgs = ParseCommand.parseArgs(args);
 
         // If scannerID is the string {IP}, replace it with the host IP address
         String scannerID = cmdArgs.scannerID;
