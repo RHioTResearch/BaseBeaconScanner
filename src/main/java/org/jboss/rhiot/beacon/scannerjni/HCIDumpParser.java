@@ -53,6 +53,32 @@ public class HCIDumpParser {
     private long maxEventCount = 0;
     private long lastMarkerCheckTime = 0;
 
+    /**
+     * Remove the stop marker file if it exists
+     */
+    public static void removeStopMarker() {
+        File test = new File(STOP_MARKER_FILE);
+        boolean exists = test.exists();
+        if(exists) {
+            if(!test.delete()) {
+                log.warnf("Failed to remove stop marker: %s", STOP_MARKER_FILE);
+            }
+        }
+    }
+
+    /**
+     * Test if the stop marker file exists
+     * @return true if the stop marker file exists
+     */
+    public static boolean stopMarkerExists() {
+        File test = new File(STOP_MARKER_FILE);
+        boolean stop = test.exists();
+        if(stop) {
+            log.info("Found STOP marker file, will exit...");
+        }
+        return stop;
+    }
+
     public HCIDumpParser(ParseCommand cmdArgs) {
         this.parseCommand = cmdArgs;
     }
@@ -205,15 +231,6 @@ public class HCIDumpParser {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    boolean stopMarkerExists() {
-        File test = new File(STOP_MARKER_FILE);
-        boolean stop = test.exists();
-        if(stop) {
-            log.info("Found STOP marker file, will exit...");
-        }
-        return stop;
     }
 
     void printBeaconCounts(BeaconInfo beacon, EventsBucket bucket) {
