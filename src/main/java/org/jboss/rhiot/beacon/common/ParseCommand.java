@@ -12,6 +12,8 @@ package org.jboss.rhiot.beacon.common;/*
  * limitations under the License.
  */
 
+import java.util.List;
+
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -202,6 +204,11 @@ public class ParseCommand {
         return bcastPort;
     }
 
+    public static ParseCommand parseArgs(List<String> args) {
+        String[] argsArray = new String[args.size()];
+        args.toArray(argsArray);
+        return parseArgs(argsArray);
+    }
     public static ParseCommand parseArgs(String[] args) {
         ParseCommand cmdArgs = new ParseCommand();
         JCommander cmdArgParser = new JCommander(cmdArgs);
