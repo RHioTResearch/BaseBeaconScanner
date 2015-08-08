@@ -109,6 +109,9 @@ public class ParseCommand {
     )
     public String beaconMapping = null;
 
+    @Parameter(names = {"-help", "-h", "-?"}, help = true)
+    public boolean help;
+
     public String getScannerID() {
         return scannerID;
     }
@@ -256,6 +259,8 @@ public class ParseCommand {
         ParseCommand cmdArgs = new ParseCommand();
         JCommander cmdArgParser = new JCommander(cmdArgs);
         cmdArgParser.parse(args);
+        if(cmdArgs.help)
+            cmdArgParser.usage();
         return cmdArgs;
     }
 }
