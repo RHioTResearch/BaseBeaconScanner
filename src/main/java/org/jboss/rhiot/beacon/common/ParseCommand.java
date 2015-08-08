@@ -205,6 +205,37 @@ public class ParseCommand {
         return bcastPort;
     }
 
+    @Override
+    public String toString() {
+        return "ParseCommand{" +
+                "scannerID='" + scannerID + '\'' +
+                ", heartbeatUUID='" + heartbeatUUID + '\'' +
+                ", clientID='" + clientID + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", brokerURL='" + brokerURL + '\'' +
+                ", destinationName='" + destinationName + '\'' +
+                ", statusDestinationName='" + statusDestinationName + '\'' +
+                ", statusInterval=" + statusInterval +
+                ", pubType=" + pubType +
+                ", useQueues=" + useQueues +
+                ", analyzeWindow=" + analyzeWindow +
+                ", hciDev='" + hciDev + '\'' +
+                ", skipPublish=" + skipPublish +
+                ", noParsing=" + noParsing +
+                ", skipHeartbeat=" + skipHeartbeat +
+                ", noBrokerReconnect=" + noBrokerReconnect +
+                ", skipScannerView=" + skipScannerView +
+                ", analyzeMode=" + analyzeMode +
+                ", asyncMode=" + asyncMode +
+                ", batteryTestMode=" + batteryTestMode +
+                ", bcastAddress='" + bcastAddress + '\'' +
+                ", bcastPort=" + bcastPort +
+                ", batchCount=" + batchCount +
+                ", beaconMapping='" + beaconMapping + '\'' +
+                '}';
+    }
+
     /**
      * If scannerID is the string {IP}, replace it with the host IP address
      */

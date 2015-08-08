@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
  * in C
  */
 public class BeaconInfo {
+    public String scannerID;
     public String uuid;
     public boolean isHeartbeat;
     public int count;
@@ -32,6 +33,14 @@ public class BeaconInfo {
      */
     public void freeze(ByteBuffer buffer) {
         HCIDump.freezeBeaconInfo(this, buffer);
+    }
+
+    public String getScannerID() {
+        return scannerID;
+    }
+
+    public void setScannerID(String scannerID) {
+        this.scannerID = scannerID;
     }
 
     public String getUuid() {

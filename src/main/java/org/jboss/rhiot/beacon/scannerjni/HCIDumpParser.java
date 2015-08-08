@@ -91,6 +91,14 @@ public class HCIDumpParser {
         this.beaconMapper = beaconMapper;
     }
 
+    public void run() {
+        try {
+            start();
+        } catch (Exception e) {
+            log.error("Failed to start scanner", e);
+        }
+    }
+
     public void start() throws Exception {
         stopped = false;
         eventConsumer.setParseCommand(parseCommand);
@@ -112,7 +120,7 @@ public class HCIDumpParser {
         else if (!parseCommand.isSkipPublish()) {
             String username = parseCommand.getUsername();
             String password = parseCommand.getPassword();
-            publisher = MsgPublisherFactory.newMsgPublisher(parseCommand.getPubType(), parseCommand.getBrokerURL(), clientID, username, password);
+            publisher = MsgPublisherFactory.newMsgPublisher(parseCommand.getPubType(), parseCommand.getBrokerURL(), username, password, clientID);
             publisher.setUseTopics(!parseCommand.isUseQueues());
             log.infof("setUseTopics: %s\n", publisher.isUseTopics() ? "true" : "false");
             publisher.setDestinationName(parseCommand.getDestinationName());
@@ -121,6 +129,7 @@ public class HCIDumpParser {
                 log.infof("Enabled transactions\n");
             }
             publisher.start(parseCommand.isAsyncMode());
+            log.info("Publisher started");
 
             // Create a thread for the consumer unless running in battery test mode
             if(!parseCommand.isBatteryTestMode()) {

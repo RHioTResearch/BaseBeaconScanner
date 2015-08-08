@@ -9,6 +9,7 @@ import java.net.SocketException;
 
 /**
  * The main entry point for the java scanner that integrates with the JNI bluez stack code
+ * Enable the jboss logmanager by passing -Djava.util.logging.manager=org.jboss.logmanager.LogManager
  * @see HCIDump
  */
 public class Main {

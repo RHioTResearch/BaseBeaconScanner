@@ -54,8 +54,19 @@ public class HCIDump {
     private static IEventCallback eventCallback;
     private static String scannerID;
 
+    /** Map the given ByteBuffer to a direct byte buffer that shares memory
+      contents between C/Java so that the native byte[] is read through
+      the bb instance.
+    @param bb - the java ByteBuffer instance to map to a native byte[] address.
+    @param device - the bluetooth hci device number.
+    */
     public native static void allocScanner(ByteBuffer bb, int device);
+    /** Free the native btye buffer array
+    */
     public native static void freeScanner();
+    /** Enable/disable verbose debug mode output from the native scanner
+    */
+    public native static void enableDebugMode(boolean flag);
 
     public static IRawEventCallback getRawEventCallback() {
         return rawEventCallback;
@@ -176,6 +187,7 @@ public class HCIDump {
                 ByteBuffer readOnly = theNativeBuffer.asReadOnlyBuffer();
                 readOnly.order(ByteOrder.LITTLE_ENDIAN);
                 BeaconInfo info = new BeaconInfo(readOnly);
+                info.setScannerID(scannerID);
                 System.out.printf("%s\n", info);
             }
         } catch (Throwable t) {

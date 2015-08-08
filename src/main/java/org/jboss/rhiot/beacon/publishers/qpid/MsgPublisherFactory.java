@@ -11,7 +11,7 @@ public class MsgPublisherFactory implements org.jboss.rhiot.beacon.common.MsgPub
         MsgPublisher publisher = null;
         switch (type) {
             case AMQP_QPID:
-                publisher = new QpidPublisher();
+                publisher = new QpidPublisher(brokerUrl, userName, password, clientID);
                 break;
         }
         return publisher;
