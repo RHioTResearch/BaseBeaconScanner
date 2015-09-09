@@ -12,10 +12,9 @@ import java.util.Properties;
  * Beacon mapping implementation based on a backing Properties file.
  */
 public class PropertiesMapper implements IBeaconMapper {
-    private Properties mapping;
+    private Properties mapping = new Properties();
 
     public PropertiesMapper(Properties mapping) {
-        this.mapping = new Properties();
         // Copy the properties into the mapping
         for(String key : mapping.stringPropertyNames()) {
             this.mapping.setProperty(key, mapping.getProperty(key));
@@ -28,7 +27,6 @@ public class PropertiesMapper implements IBeaconMapper {
      * @throws IOException
      */
     public PropertiesMapper(File store) throws IOException {
-        this.mapping = new Properties();
         FileReader reader = new FileReader(store);
         this.mapping.load(reader);
     }

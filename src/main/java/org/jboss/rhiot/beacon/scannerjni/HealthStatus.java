@@ -114,7 +114,7 @@ public class HealthStatus {
             if (line != null) {
                 // 18:25  up 3 days,  9:01, 12 users, load averages: 1.78 2.10 2.23
                 // 01:25:06 up 1 day,  7:03,  2 users,  load average: 0.09, 0.16, 0.14
-                Pattern parse = Pattern.compile("((\\d+) day[s]?,)?\\s+(\\d+):(\\d+),.*(load average[s]?:.*)");
+                Pattern parse = Pattern.compile("\\s?((\\d+) day[s]?,)?\\s+(\\d+):(\\d+),.*(load average[s]?:.*)");
                 Matcher matcher = parse.matcher(line);
                 if (matcher.find()) {
                     String _days = matcher.group(2);
@@ -132,6 +132,9 @@ public class HealthStatus {
                     minutes = (uptimeMS - days * 24*3600*1000 - hours*3600*1000) / (60*1000);
                     long seconds = (uptimeMS - days * 24*3600*1000 - hours*3600*1000 - minutes*60*1000) / 1000;
                     systemInfo = new SystemInfo(uptimeMS, loadAvgs);
+                } else {
+                    log.warn("Failed to parse system uptime");
+                    systemInfo = new SystemInfo(0, "0.00 0.00 0.00");
                 }
             }
             if(systemInfo != null) {
@@ -142,6 +145,7 @@ public class HealthStatus {
             }
         } catch (IOException e) {
             log.warn("Failed to get uptime", e);
+            systemInfo = new SystemInfo(0, "0.00 0.00 0.00");
         }
         return systemInfo;
     }
