@@ -92,6 +92,9 @@ public class ParseCommand {
     @Parameter(names = "-batteryTestMode",
         description = "Simply monitor the raw heartbeat beacon events and publish them to the destinationName")
     public boolean batteryTestMode = false;
+    @Parameter(names = "-useScannerConf",
+            description = "Load the scanner.conf file and populate the command line args from it")
+    public boolean useScannerConf = false;
     @Parameter(names = "-bcastAddress",
         description = "Address to broadcast scanner status to as backup to statusQueue if non-empty; default empty")
     public String bcastAddress;
@@ -261,6 +264,14 @@ public class ParseCommand {
         cmdArgParser.parse(args);
         if(cmdArgs.help)
             cmdArgParser.usage();
+        if(cmdArgs.useScannerConf) {
+            // Load the scanner.conf and reparse the arguments
+            String[] newArgs = loadScannerConf(args);
+        }
         return cmdArgs;
+    }
+    public static String[] loadScannerConf(String[] args) {
+        String[] newArgs = null;
+        return newArgs;
     }
 }
