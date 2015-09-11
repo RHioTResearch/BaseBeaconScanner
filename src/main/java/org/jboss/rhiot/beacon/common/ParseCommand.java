@@ -12,8 +12,15 @@ package org.jboss.rhiot.beacon.common;/*
  * limitations under the License.
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -93,7 +100,7 @@ public class ParseCommand {
         description = "Simply monitor the raw heartbeat beacon events and publish them to the destinationName")
     public boolean batteryTestMode = false;
     @Parameter(names = "-useScannerConf",
-            description = "Load the scanner.conf file and populate the command line args from it")
+            description = "Load the scanner.conf file and populate the command line args from it. Searches current dir and home dir.")
     public boolean useScannerConf = false;
     @Parameter(names = "-bcastAddress",
         description = "Address to broadcast scanner status to as backup to statusQueue if non-empty; default empty")
@@ -262,16 +269,52 @@ public class ParseCommand {
         ParseCommand cmdArgs = new ParseCommand();
         JCommander cmdArgParser = new JCommander(cmdArgs);
         cmdArgParser.parse(args);
+
         if(cmdArgs.help)
             cmdArgParser.usage();
         if(cmdArgs.useScannerConf) {
             // Load the scanner.conf and reparse the arguments
-            String[] newArgs = loadScannerConf(args);
+            try {
+                String[] newArgs = loadScannerConf();
+                if(newArgs != null) {
+                    // Parse new args into existing cmdArgs instance
+                    cmdArgParser = new JCommander(cmdArgs);
+                    cmdArgParser.parse(newArgs);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return cmdArgs;
     }
-    public static String[] loadScannerConf(String[] args) {
+
+    /**
+     * Search the current directory and user home for a scanner.conf properties file
+     * @return the command line args for the scanner.conf properties if found, null otherwise
+     * @throws IOException
+     */
+    public static String[] loadScannerConf() throws IOException {
         String[] newArgs = null;
+        // First check current directory
+        File scannerConf = new File("scanner.conf");
+        if(scannerConf.exists() == false) {
+            // Check user home directory
+            String home = System.getenv("HOME");
+            scannerConf = new File(home, "scanner.conf");
+        }
+        if(scannerConf.exists()) {
+            // Load the properties and build a new args array from them
+            FileReader confReader = new FileReader(scannerConf);
+            Properties scannerProps = new Properties();
+            scannerProps.load(confReader);
+            ArrayList tmp = new ArrayList();
+            for(String key : scannerProps.stringPropertyNames()) {
+                tmp.add("-"+key);
+                tmp.add(scannerProps.getProperty(key));
+            }
+            newArgs = new String[tmp.size()];
+            tmp.toArray(newArgs);
+        }
         return newArgs;
     }
 }
