@@ -10,6 +10,13 @@ package org.jboss.rhiot.beacon.lcd;
 public class MiniLcdPCD8544 extends AbstractLcdView {
 
     /**
+     * Initialize the display to 6 rows, 14 cols
+     * @return
+     */
+    public int init() {
+        return init(6, 14);
+    }
+    /**
      * Initialize the display to the given size
      */
     public int init(int rows, int cols) {

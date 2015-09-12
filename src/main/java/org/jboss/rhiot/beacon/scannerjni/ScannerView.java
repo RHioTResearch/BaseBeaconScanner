@@ -7,6 +7,7 @@ import org.jboss.rhiot.beacon.common.StatusInformation;
  * Created by starksm on 7/11/15.
  */
 public interface ScannerView {
+    public int init();
     public void displayStatus(StatusInformation statusInformation);
 
     public boolean isDisplayBeaconsMode();

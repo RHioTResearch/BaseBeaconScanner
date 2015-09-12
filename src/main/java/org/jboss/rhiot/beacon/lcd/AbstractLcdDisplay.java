@@ -10,14 +10,14 @@ public abstract class AbstractLcdDisplay {
     protected AbstractLcdDisplay() { }
 
     /**
+     * Initialize the display to its default size
+     * @return
+     */
+    public abstract int init();
+    /**
      * Initialize the display to the given size.
      */
-    public int init() {
-        return init(4,20);
-    }
-    public int init(int rows, int cols) {
-        return 0;
-    }
+    public abstract int init(int rows, int cols);
     /**
      * Erase the display
      */
