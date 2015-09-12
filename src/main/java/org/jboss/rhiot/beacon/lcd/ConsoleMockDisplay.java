@@ -1,9 +1,9 @@
 package org.jboss.rhiot.beacon.lcd;
 
 /**
- * TODO
+ * Created by starksm on 9/12/15.
  */
-public class WiringPiLcdDisplay extends AbstractLcdView {
+public class ConsoleMockDisplay extends AbstractLcdView {
     @Override
     public int init() {
         return 0;
@@ -16,6 +16,6 @@ public class WiringPiLcdDisplay extends AbstractLcdView {
 
     @Override
     public void displayText(String text, int col, int row) {
-
+        System.out.println(text);
     }
 }

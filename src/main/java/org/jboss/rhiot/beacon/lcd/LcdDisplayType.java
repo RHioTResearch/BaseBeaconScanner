@@ -8,5 +8,7 @@ public enum LcdDisplayType {
     HD44780U,
     // A Nokia/Phillips 48x84 lcd display with PCD8544 controller
     PCD8544,
+    // A console mock display
+    CONSOLE,
     INVALID_LCD_TYPE
 }

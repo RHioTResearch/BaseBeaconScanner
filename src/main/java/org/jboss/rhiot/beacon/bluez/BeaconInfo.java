@@ -27,6 +27,13 @@ public class BeaconInfo {
     public BeaconInfo(ByteBuffer buffer) {
         freeze(buffer);
     }
+    public BeaconInfo(String scannerID, boolean isHeartbeat, int major, int minor, long time) {
+        this.scannerID = scannerID;
+        this.isHeartbeat = isHeartbeat;
+        this.major = major;
+        this.minor = minor;
+        this.time = time;
+    }
 
     /**
      * Read the underlying buffer into the public fields

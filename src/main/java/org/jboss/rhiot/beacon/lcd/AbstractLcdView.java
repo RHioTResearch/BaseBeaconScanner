@@ -9,9 +9,9 @@ import org.jboss.rhiot.beacon.common.StatusInformation;
 import org.jboss.rhiot.beacon.scannerjni.ScannerView;
 
 /**
- * Created by starksm on 9/11/15.
+ * Base lcd view class that handles the formatting of objects to text
  */
-public class AbstractLcdView extends AbstractLcdDisplay implements ScannerView {
+public abstract class AbstractLcdView extends AbstractLcdDisplay implements ScannerView {
     private IBeaconMapper beaconMapper;
 
     /**
@@ -35,11 +35,6 @@ public class AbstractLcdView extends AbstractLcdDisplay implements ScannerView {
     }
     public void setBeaconMapper(IBeaconMapper beaconMapper) {
         this.beaconMapper = beaconMapper;
-    }
-
-    @Override
-    public void displayText(String text, int col, int row) {
-
     }
 
     @Override
@@ -96,7 +91,7 @@ public class AbstractLcdView extends AbstractLcdDisplay implements ScannerView {
     public void displayStatus(StatusInformation status){
         String name = truncateName(status.getScannerID());
         truncateName(name);
-        String text = String.format("%s:%.7d;%d", name, status.getHeartbeatCount(), status.getHeartbeatRSSI());
+        String text = String.format("%s:%7d;%d", name, status.getHeartbeatCount(), status.getHeartbeatRSSI());
         displayText(text, 0, 0);
         Properties statusProps = status.getLastStatus();
 
@@ -104,7 +99,7 @@ public class AbstractLcdView extends AbstractLcdDisplay implements ScannerView {
         displayText(text, 0, 1);
         String load = statusProps.getProperty("LoadAverage");
         displayText(load, 0, 2);
-        text = String.format("S:%.8d;M:%.7d", status.getRawEventCount(), status.getPublishEventCount());
+        text = String.format("S:%8d;M:%7d", status.getRawEventCount(), status.getPublishEventCount());
         displayText(text, 0, 3);
     }
 

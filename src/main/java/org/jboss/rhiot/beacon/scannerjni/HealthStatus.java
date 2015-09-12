@@ -28,7 +28,7 @@ public class HealthStatus {
     private Thread monitorThread;
     private volatile boolean running;
 
-    static class SystemInfo {
+    public static class SystemInfo {
         private long uptime;
         private String loadAverages;
         private long totalram;
