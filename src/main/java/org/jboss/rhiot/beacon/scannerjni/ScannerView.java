@@ -1,6 +1,6 @@
 package org.jboss.rhiot.beacon.scannerjni;
 
-import org.jboss.rhiot.beacon.common.AbstractBeaconMapper;
+import org.jboss.rhiot.beacon.common.IBeaconMapper;
 import org.jboss.rhiot.beacon.common.StatusInformation;
 
 /**
@@ -11,6 +11,6 @@ public interface ScannerView {
 
     public boolean isDisplayBeaconsMode();
 
-    public AbstractBeaconMapper getBeaconMapper();
-    public void setBeaconMapper(AbstractBeaconMapper beaconMapper);
+    public IBeaconMapper getBeaconMapper();
+    public void setBeaconMapper(IBeaconMapper beaconMapper);
 }

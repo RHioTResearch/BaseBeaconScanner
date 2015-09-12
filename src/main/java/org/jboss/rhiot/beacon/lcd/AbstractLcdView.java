@@ -3,7 +3,7 @@ package org.jboss.rhiot.beacon.lcd;
 import java.util.Date;
 import java.util.Properties;
 
-import org.jboss.rhiot.beacon.common.AbstractBeaconMapper;
+import org.jboss.rhiot.beacon.common.IBeaconMapper;
 import org.jboss.rhiot.beacon.common.Beacon;
 import org.jboss.rhiot.beacon.common.StatusInformation;
 import org.jboss.rhiot.beacon.scannerjni.ScannerView;
@@ -12,7 +12,7 @@ import org.jboss.rhiot.beacon.scannerjni.ScannerView;
  * Created by starksm on 9/11/15.
  */
 public class AbstractLcdView extends AbstractLcdDisplay implements ScannerView {
-    private AbstractBeaconMapper beaconMapper;
+    private IBeaconMapper beaconMapper;
 
     /**
      * Singleton accessor
@@ -30,10 +30,10 @@ public class AbstractLcdView extends AbstractLcdDisplay implements ScannerView {
         return display;
     }
 
-    public AbstractBeaconMapper getBeaconMapper() {
+    public IBeaconMapper getBeaconMapper() {
         return beaconMapper;
     }
-    public void setBeaconMapper(AbstractBeaconMapper beaconMapper) {
+    public void setBeaconMapper(IBeaconMapper beaconMapper) {
         this.beaconMapper = beaconMapper;
     }
 

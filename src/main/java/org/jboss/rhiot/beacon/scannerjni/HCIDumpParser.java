@@ -162,6 +162,8 @@ public class HCIDumpParser {
             try {
                 scannerView = AbstractLcdView.getLcdDisplayInstance(parseCommand.lcdType);
                 log.info("Loaded LCD instance");
+                if(beaconMapper != null)
+                    scannerView.setBeaconMapper(beaconMapper);
             } catch (Throwable error) {
                 log.warn("Failed to load LCD instance", error);
             }
