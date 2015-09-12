@@ -13,6 +13,8 @@ import org.jboss.rhiot.beacon.common.EventsWindow;
 import org.jboss.rhiot.beacon.common.MsgPublisher;
 import org.jboss.rhiot.beacon.common.MsgPublisherFactory;
 import org.jboss.rhiot.beacon.common.StatusInformation;
+import org.jboss.rhiot.beacon.lcd.AbstractLcdView;
+import org.jboss.rhiot.beacon.lcd.LcdDisplayType;
 
 import java.io.File;
 import java.io.IOException;
@@ -152,6 +154,17 @@ public class HCIDumpParser {
         // Load the beacon mapping
         if(parseCommand.beaconMapping != null) {
             loadBeaconMapping(parseCommand.beaconMapping);
+        }
+
+        // Try to load the scanner view
+        if(parseCommand.lcdType != LcdDisplayType.INVALID_LCD_TYPE) {
+            log.infof("Trying to load LCD type: %s", parseCommand.lcdType);
+            try {
+                scannerView = AbstractLcdView.getLcdDisplayInstance(parseCommand.lcdType);
+                log.info("Loaded LCD instance");
+            } catch (Throwable error) {
+                log.warn("Failed to load LCD instance", error);
+            }
         }
     }
 

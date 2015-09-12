@@ -13,6 +13,7 @@ public class TestLCD {
     public void testMiniLcdPCD8544() throws InterruptedException {
         MiniLcdPCD8544 lcd = new MiniLcdPCD8544();
         lcd.init();
+        lcd.clear();
         lcd.displayText("Testing, 1 2 3", 0, 0);
         Date now = new Date();
         String text = String.format("%tT", now);

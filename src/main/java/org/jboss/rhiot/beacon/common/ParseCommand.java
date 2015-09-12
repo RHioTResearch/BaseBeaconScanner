@@ -25,6 +25,7 @@ import java.util.Properties;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import org.jboss.rhiot.beacon.lcd.LcdDisplayType;
 
 /**
  * The command line args for the scanner
@@ -67,7 +68,9 @@ public class ParseCommand {
     @Parameter(names = "-useQueues",
         description = "Specify whether destination is a queue; default false == destination is a topic")
     public boolean useQueues = false;
-
+    @Parameter(names = "-lcdType",
+        description = "Specify the LcdDisplayType enum for the LCD implementation to use; default PCD8544")
+    public LcdDisplayType lcdType = LcdDisplayType.PCD8544;
 
     @Parameter(names = "-analyzeWindow",
         description = "Specify the number of seconds in the analyzeMode time window, default is 1.")
