@@ -13,6 +13,7 @@ public enum StatusProperties {
     SystemTime,         // strftime(timestr, 128, "%F %T", tm) = YYYY-MM-DD HH:MM:SS
     SystemTimeMS,       // system time in milliseconds since epoch
     Uptime,             // uptime of scanner process in seconds as string formatted as "uptime: %ld, days:%d, hrs: %d, min: %d"
+    UptimeShort,        // uptime of scanner process in seconds as string formatted as "UP D:%d H:%d M:%d S:%d"
     SystemUptime,       // uptime of system in seconds as string formatted as "uptime: %ld, days:%d, hrs: %d, min: %d"
     Procs,              // number of procs active on the scanner
     LoadAverage,        // load averages for the past 1, 5, and 15 minutes "load average: 0.00, 0.01, 0.05"

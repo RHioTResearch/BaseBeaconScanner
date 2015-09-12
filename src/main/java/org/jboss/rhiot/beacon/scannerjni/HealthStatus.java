@@ -227,6 +227,7 @@ public class HealthStatus {
         String SystemTime = StatusProperties.SystemTime.name();
         String SystemTimeMS = StatusProperties.SystemTimeMS.name();
         String Uptime = StatusProperties.Uptime.name();
+        String UptimeShort = StatusProperties.UptimeShort.name();
         String SystemUptime = StatusProperties.SystemUptime.name();
         String LoadAverage = StatusProperties.LoadAverage.name();
         String Procs = StatusProperties.Procs.name();
@@ -305,7 +306,10 @@ public class HealthStatus {
             long minutes = (uptimeDiff - days * 24*3600*1000 - hours*3600*1000) / (60*1000);
             long seconds = (uptimeDiff - days * 24*3600*1000 - hours*3600*1000 - minutes*60*1000) / 1000;
             String uptime = String.format("uptime: %d, days:%d, hrs:%d, min:%d, sec:%d", uptimeDiff, days, hours, minutes, seconds);
+            String uptimeShort = String.format("UP D:%d H:%d M:%d S:%d", days, hours, minutes, seconds);
             statusProperties.put(Uptime, uptime);
+            statusProperties.put(UptimeShort, uptimeShort);
+
             status.append("Scanner ");
             status.append(uptime);
             status.append('\n');
