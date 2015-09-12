@@ -304,6 +304,7 @@ public class HCIDumpParser {
             }
         }
         if(closest != null) {
+            log.infof("closestBeacon: %s", closest);
             scannerView.displayBeacon(closest);
         } else if(heartbeat != null) {
             // The only beacon seen was the heartbeat beacon, so display it
