@@ -3,6 +3,7 @@ package org.jboss.rhiot.beacon.lcd;
 import java.util.Date;
 import java.util.Properties;
 
+import org.jboss.rhiot.beacon.bluez.BeaconInfo;
 import org.jboss.rhiot.beacon.common.IBeaconMapper;
 import org.jboss.rhiot.beacon.common.Beacon;
 import org.jboss.rhiot.beacon.common.StatusInformation;
@@ -13,6 +14,7 @@ import org.jboss.rhiot.beacon.scannerjni.ScannerView;
  */
 public abstract class AbstractLcdView extends AbstractLcdDisplay implements ScannerView {
     private IBeaconMapper beaconMapper;
+    private boolean displayBeaconsMode = true;
 
     /**
      * Singleton accessor
@@ -39,7 +41,10 @@ public abstract class AbstractLcdView extends AbstractLcdDisplay implements Scan
 
     @Override
     public boolean isDisplayBeaconsMode() {
-        return false;
+        return displayBeaconsMode;
+    }
+    public void toggleDisplayBeaconsMode() {
+        displayBeaconsMode = !displayBeaconsMode;
     }
 
     /**
@@ -103,6 +108,45 @@ public abstract class AbstractLcdView extends AbstractLcdDisplay implements Scan
         displayText(text, 0, 3);
     }
 
+    /**
+     * display format:
+     * 0: scannerID
+     * 1: Beacon(%d)
+     * 2:  rssi
+     * 3:  timestamp
+     * 4:  Hello user...
+     */
+    public void displayBeacon(BeaconInfo beacon) {
+        clear();
+        int col = 1;
+        int row = 0;
+        displayText(beacon.getScannerID(), 0, row ++);
+        int minorID = beacon.getMinor();
+        String text = String.format("Beacon(%d):", minorID);
+        displayText(text, 0, row ++);
+        text = String.format("rssi=%d", beacon.getRssi());
+        displayText(text, col, row ++);
+        displayTime(beacon.getTime(), col, row ++);
+        if(beaconMapper != null) {
+            String user = beaconMapper.lookupUser(minorID);
+            text = String.format("Hello %s", user);
+        } else {
+            text = String.format("Hello Unknown");
+        }
+        displayText(text, col, row);
+    }
+    public void displayHeartbeat(BeaconInfo beacon) {
+        int col = 1;
+        int row = 0;
+        displayText(beacon.getScannerID(), 0, row ++);
+        int minorID = beacon.getMinor();
+        String text = String.format("Heartbeat(%d):", minorID);
+        displayText(text, 0, row ++);
+        text = String.format("rssi=%d", beacon.getRssi());
+        displayText(text, col, row ++);
+        displayTime(beacon.getTime(), col, row ++);
+        displayText("No other in range", col, row);
+    }
 
     public void displayTime(long timeInMS, int col, int row) {
         String timestr = String.format("%tT", new Date(timeInMS));

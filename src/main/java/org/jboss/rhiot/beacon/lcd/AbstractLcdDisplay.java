@@ -4,8 +4,6 @@ package org.jboss.rhiot.beacon.lcd;
  * Created by starksm on 9/11/15.
  */
 public abstract class AbstractLcdDisplay {
-    private int nCols;
-    private int lcdHandle;
 
     protected AbstractLcdDisplay() { }
 

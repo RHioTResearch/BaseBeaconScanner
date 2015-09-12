@@ -19,6 +19,7 @@ import org.jboss.rhiot.beacon.lcd.LcdDisplayType;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -282,38 +283,37 @@ public class HCIDumpParser {
             log.infof("\n");
         }
     }
+
+    /**
+     * Display the closest beacon seen in the given even bucket
+     * @param bucket collection of beacon events seen in last time window
+     */
     void displayClosestBeacon(EventsBucket bucket) {
-        /* TODO
-        map<int32_t, beacon_info>::const_iterator iter = bucket->begin();
-        int32_t maxRSSI = -100;
-        const beacon_info *closest = nullptr;
-        const beacon_info *heartbeat = nullptr;
-        while (iter != bucket->end()) {
-            // Skip the heartbeast beacon...
-            if(iter->second.rssi > maxRSSI) {
-                if(scannerUUID.compare(iter->second.uuid) == 0)
-                    heartbeat = &iter->second;
+        int maxRSSI = -100;
+        BeaconInfo closest = null;
+        BeaconInfo heartbeat = null;
+        for(Map.Entry<Integer,BeaconInfo> iter : bucket.getBucket().entrySet()) {
+            if(iter.getValue().getRssi() > maxRSSI) {
+                BeaconInfo info = iter.getValue();
+                if(parseCommand.heartbeatUUID.compareTo(info.getUuid()) == 0)
+                    heartbeat = info;
                 else {
-                    maxRSSI = iter->second.rssi;
-                    closest = &iter->second;
+                    maxRSSI = info.rssi;
+                    closest = info;
                 }
             }
-            iter++;
         }
-        if(closest != nullptr) {
-            Beacon closestBeacon(parseCommand.getScannerID(), closest->uuid, closest->code, closest->manufacturer,
-                closest->major, closest->minor, closest->power, closest->calibrated_power,
-                closest->rssi, closest->time);
-            scannerView->displayBeacon(closestBeacon);
-        } else if(heartbeat != nullptr) {
+        if(closest != null) {
+            scannerView.displayBeacon(closest);
+        } else if(heartbeat != null) {
             // The only beacon seen was the heartbeat beacon, so display it
-            Beacon heartbeatBeacon(parseCommand.getScannerID(), heartbeat->uuid, heartbeat->code, heartbeat->manufacturer,
-                heartbeat->major, heartbeat->minor, heartbeat->power, heartbeat->calibrated_power,
-                heartbeat->rssi, heartbeat->time);
-            scannerView->displayHeartbeat(heartbeatBeacon);
+            scannerView.displayHeartbeat(heartbeat);
         }
-        */
     }
+
+    /**
+     * Display the current scanner status on the scannerview
+     */
     void displayStatus() {
         scannerView.displayStatus(statusInformation);
     }
