@@ -188,6 +188,7 @@ public class HCIDumpParser {
     public boolean beaconEvent(ByteBuffer rawInfo) {
         // First get a read only ByteBuffer view for efficient testing of the event info
         BeaconInfo info = new BeaconInfo(rawInfo);
+        info.setScannerID(parseCommand.scannerID);
         eventCount ++;
         if(log.isTraceEnabled()) {
             log.tracef("beaconEvent(), uuid=%s, major=%d, minor=%d, rssi=%d\n",
