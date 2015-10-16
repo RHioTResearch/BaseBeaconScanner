@@ -115,4 +115,37 @@ public class TestJMSClient {
         System.out.printf("%s\n", msg);
         publisher.stop();
     }
+
+    @Test
+    public void testBeaconEventsRecv() throws Exception {
+        Properties props = new Properties();
+        props.setProperty(InitialContext.INITIAL_CONTEXT_FACTORY, "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
+        props.setProperty("connectionfactory.myFactoryLookup", "amqp://192.168.1.107:5672");
+        Context context = new InitialContext(props);
+
+        // Create a Connection
+        ConnectionFactory factory = (ConnectionFactory) context.lookup("myFactoryLookup");
+        Connection connection = factory.createConnection(USER, PASSWORD);
+        System.out.printf("ConnectionFactory created connection: %s\n", connection);
+        connection.setExceptionListener(new ExceptionListener() {
+            @Override
+            public void onException(JMSException ex) {
+                ex.printStackTrace();
+            }
+        });
+        connection.start();
+
+        Session session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+        System.out.printf("Created session: %s\n", session);
+        Destination beaconEvents  = session.createTopic("beaconEvents");
+        MessageConsumer consumer = session.createConsumer(beaconEvents);
+        Message msg = consumer.receive(31000);
+        while(msg != null) {
+            System.out.printf("Recv message: %s\n", msg);
+            msg = consumer.receive(31000);
+        }
+        consumer.close();
+        session.close();
+        connection.close();
+    }
 }
