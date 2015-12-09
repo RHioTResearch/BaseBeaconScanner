@@ -13,12 +13,10 @@ package org.jboss.rhiot.beacon.common;/*
  */
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -114,6 +112,10 @@ public class ParseCommand {
     @Parameter(names = "-batchCount",
         description = "Specify a maxium number of events the scanner should combine before sending to broker; default 0 means no batching")
     public int batchCount = 0;
+
+    @Parameter(names = "-bootServices",
+    description = "A list of services to load at bootstrap if non-empty. The format depends on the bootstrap framework; default empty")
+    public List<String> bootServices = new ArrayList<>();
 
     @Parameter(names = "-beaconMapping",
         description = "Specify the source of the beacon id to user name mapping. The following formats are understood:\n"
