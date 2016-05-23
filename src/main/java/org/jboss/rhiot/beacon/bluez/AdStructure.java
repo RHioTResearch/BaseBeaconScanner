@@ -47,6 +47,16 @@ public class AdStructure {
         return hex.toString();
     }
 
+    public boolean startsWith(byte[] prefix) {
+        boolean matches = true;
+        for (int n = 0; n < prefix.length; n++) {
+            matches &= (data[n] == prefix[n]);
+            if(!matches)
+                break;
+        }
+        return matches;
+    }
+
     public String toString() {
         StringBuilder tmp = new StringBuilder(String.format("ADS(type=%2X:%d): %s", type, length, dataAsHexString()));
         return tmp.toString();
