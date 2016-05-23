@@ -1,12 +1,21 @@
 package org.jboss.rhiot.beacon.bluez;
 
 import org.jboss.rhiot.beacon.common.Beacon;
+import org.jboss.rhiot.beacon.scannerjni.HealthStatus;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 
 /**
- * An integration class
+ * This is the Java to native bridge class that exposes the bluez hcidump information as Java objects. It two different
+ * modes of running based on what callback type is enabled.
+ * {@link #setEventCallback(IEventCallback)} and {@link #setRawEventCallback(IRawEventCallback)} provide iBeacon
+ * type of filtering of the data to provide a BeaconInfo callback object.
+ * The {@link #setAdvertEventCallback(IAdvertEventCallback)} is a more general scanning mode that provides all
+ * BLE advertising events in a AdEventInfo callback object. This is a superset mode of the beacon scanning mode
+ * since a beacon event is just an AdEventInfo event with a specific structure for the manufacturer specific
+ * AdStructure.
  */
 public class HCIDump {
     static final int beacon_info_SIZEOF = 80;
@@ -35,7 +44,7 @@ public class HCIDump {
             int32_t rssi;
             int64_t time;
         } beacon_info;
-        root@debian8x64:~/NativeRaspberryPiBeaconParser# Debug/tests/testBeaconBuffer
+        root@debian8x64:~/BeaconScannerJNI# Debug/tests/testBeaconBuffer
         sizeof(beacon_info) = 80
         offsetof(beacon_info.isHeartbeat) = 36
         offsetof(beacon_info.count) = 40
@@ -47,20 +56,52 @@ public class HCIDump {
         offsetof(beacon_info.calibrated_power) = 64
         offsetof(beacon_info.rssi) = 68
         offsetof(beacon_info.time) = 72
+    */
+
+    static final int ADI_total_length_OFFSET = 0;
+    static final int ADI_bdaddr_type_OFFSET = 4;
+    static final int ADI_bdaddr_OFFSET = 5;
+    static final int ADI_count_OFFSET = 11;
+    static final int ADI_rssi_OFFSET = 12;
+    static final int ADI_time_OFFSET = 16;
+    static final int ADI_data_OFFSET = 24;
+    /*
+        OR
+
+        typedef struct ad_data_inline {
+            uint8_t	bdaddr_type;
+            uint8_t bdaddr[6];
+            uint8_t count;
+            int32_t rssi;
+            int64_t time;
+            ad_structure data[];
+        } ad_data_inline;
+
+        sizeof(ad_data_inline) = 24
+        offsetof(ad_data_inline.total_length) = 0
+        offsetof(ad_data_inline.bdaddr_type) = 4
+        offsetof(ad_data_inline.bdaddr) = 5
+        offsetof(ad_data_inline.count) = 11
+        offsetof(ad_data_inline.rssi) = 12
+        offsetof(ad_data_inline.time) = 16
+        offsetof(ad_data_inline.data) = 24
      */
     private static ByteBuffer theNativeBuffer;
     private static volatile int eventCount = 0;
     private static IRawEventCallback rawEventCallback;
     private static IEventCallback eventCallback;
+    private static IAdvertEventCallback advertEventCallback;
     private static String scannerID;
 
     /** Map the given ByteBuffer to a direct byte buffer that shares memory
       contents between C/Java so that the native byte[] is read through
-      the bb instance.
+      the bb instance. This should not be called directly, rather it is called by initScanner.
+
     @param bb - the java ByteBuffer instance to map to a native byte[] address.
     @param device - the bluetooth hci device number.
+    @param isGeneral - is the scanner running for general BLE ad events or just beacons
     */
-    public native static void allocScanner(ByteBuffer bb, int device);
+    public native static void allocScanner(ByteBuffer bb, int device, boolean isGeneral);
     /** Free the native btye buffer array
     */
     public native static void freeScanner();
@@ -84,6 +125,14 @@ public class HCIDump {
         HCIDump.eventCallback = eventCallback;
     }
 
+    public static IAdvertEventCallback getAdvertEventCallback() {
+        return advertEventCallback;
+    }
+
+    public static void setAdvertEventCallback(IAdvertEventCallback advertEventCallback) {
+        HCIDump.advertEventCallback = advertEventCallback;
+    }
+
     public static String getScannerID() {
         return scannerID;
     }
@@ -94,17 +143,38 @@ public class HCIDump {
 
     /**
      * Setup the native scanner stack for the given hciDev interface. This allocates the direct ByteBuffer used by
-     * the native stack and starts the scanner running by calling allocScanner
+     * the native stack and starts the scanner running by calling allocScanner. This is a legacy convienence method
+     * that calls initScanner(hciDev, beacon_info_SIZEOF, ByteOrder.LITTLE_ENDIAN)
+     *
      * @param hciDev - the host controller interface (for example, hci0)
-     * @see #allocScanner(ByteBuffer, int)
+     * @see #allocScanner(ByteBuffer, int, boolean)
+     * @see #initScanner(String, int, ByteOrder)
      */
     public static void initScanner(String hciDev) {
+        initScanner(hciDev, beacon_info_SIZEOF, ByteOrder.LITTLE_ENDIAN);
+    }
+
+    /**
+     * Setup the native scanner stack for the given hciDev interface. This allocates the direct ByteBuffer used by
+     * the native stack and starts the scanner running by calling allocScanner. This invokes the allocScanner
+     * method with an isGeneral flag that is set based on whether the advertEventCallback has been configured.
+     *
+     * @see #allocScanner(ByteBuffer, int, boolean)
+     * @see #setAdvertEventCallback(IAdvertEventCallback)
+     *
+     * @param hciDev - the host controller interface (for example, hci0)
+     * @param maxBufferSize - the maximum amount of memory to allocate for the native buffer
+     * @param order - the endian order of the buffer
+     */
+    public static void initScanner(String hciDev, int maxBufferSize, ByteOrder order) {
         char devNumber = hciDev.charAt(hciDev.length()-1);
         int device = devNumber - '0';
-        ByteBuffer bb = ByteBuffer.allocateDirect(beacon_info_SIZEOF);
-        bb.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer bb = ByteBuffer.allocateDirect(maxBufferSize);
+        bb.order(order);
         HCIDump.theNativeBuffer = bb;
-        HCIDump.allocScanner(bb, device);
+        // Set the general scanning mode flag based on whether there is an advertEventCallback
+        boolean isGeneral = advertEventCallback != null;
+        HCIDump.allocScanner(bb, device, isGeneral);
     }
 
     /**
@@ -136,13 +206,83 @@ public class HCIDump {
     }
 
     /**
+     * Extract the inlined ad_data_inline from the ByteBuffer into the info argument.
+     * @param info
+     * @param buffer
+     */
+    public static void freezeAdEventInfo(AdEventInfo info, ByteBuffer buffer) {
+        //System.out.printf("Begin.freezeAdEventInfo\n");
+        int totalLength = buffer.getInt(ADI_total_length_OFFSET);
+        //System.out.printf("totalLength=%d\n", totalLength);
+
+        /** The type of the bdaddr; 0 = Public, 1 = Random, other = Reserved */
+        int	bdaddr_type = buffer.get(ADI_bdaddr_type_OFFSET);
+        //System.out.printf("bdaddr_type=%d\n", bdaddr_type);
+        info.setBdaddrType(bdaddr_type);
+
+        /** The address of the advertising packet */
+        byte[] bdaddr = new byte[6];
+        for(int n = 0; n < 6; n ++)
+            bdaddr[n] = buffer.get(ADI_bdaddr_OFFSET + n);
+        info.setBDaddr(bdaddr);
+        //System.out.printf("bdaddr=%2X:%2X:%2X:%2X:%2X:%2X\n", bdaddr[0], bdaddr[1], bdaddr[2], bdaddr[3], bdaddr[4], bdaddr[5]);
+
+        /** The count of the data[] elements */
+        int count = buffer.get(ADI_count_OFFSET);
+        System.out.printf("count=%d\n", count);
+        info.setCount(count);
+
+        /** The rssi of the advertising packet */
+        int rssi = buffer.getInt(ADI_rssi_OFFSET);
+        System.out.printf("rssi=%d\n", rssi);
+        info.setRssi(rssi);
+
+        /** The time the advertising packet was received */
+        long time = buffer.getLong(ADI_time_OFFSET);
+        info.setTime(time);
+
+        /** The advertising data structures in the packet. The actual length the data, overall length of structure is length+2
+         typedef struct ad_structure {
+            uint8_t length;
+            uint8_t type;
+            uint8_t data[31];
+        } ad_structure;
+        */
+        int offset = ADI_data_OFFSET;
+        ArrayList<AdStructure> adData = new ArrayList<>();
+        //System.out.printf("Freeze: ADS.count=%d\n", count);
+        for(int i = 0; i < count; i ++) {
+            int length = buffer.get(offset ++);
+            int type = buffer.get(offset ++);
+            byte data[] = new byte[length];
+            for(int j = 0; j < length; j ++) {
+                data[j] = buffer.get(offset ++);
+            }
+            AdStructure ads = new AdStructure(type, data);
+            adData.add(ads);
+        }
+        //System.out.printf("End.freezeAdEventInfo\n");
+        info.setData(adData);
+    }
+
+    /**
      * Callback from native code to indicate that theNativeBuffer has been updated with new event data. This happens
      * from the thread that runs the scanner loop and has attached itself to this JavaVM instance. This will dispatch
-     * to the rawEventCallback, eventCallback in that preferred order.
+     * to the advertEventCallback, rawEventCallback, or eventCallback in that preferred order.
      */
     public static boolean eventNotification() {
         boolean stop = false;
         eventCount ++;
+
+        if(advertEventCallback != null) {
+            ByteBuffer readOnly = theNativeBuffer.asReadOnlyBuffer();
+            readOnly.order(ByteOrder.LITTLE_ENDIAN);
+            AdEventInfo info = new AdEventInfo();
+            freezeAdEventInfo(info, readOnly);
+            stop = advertEventCallback.advertEvent(info);
+            return stop;
+        }
+
         if(rawEventCallback != null) {
             try {
                 ByteBuffer readOnly = theNativeBuffer.asReadOnlyBuffer();
@@ -207,14 +347,14 @@ public class HCIDump {
         if(args.length > 0)
             device = Integer.parseInt(args[0]);
         try {
-            // Load
+            // Load the native library
             System.setProperty("java.library.path", "/usr/local/lib");
             System.loadLibrary("scannerJni");
 
             ByteBuffer bb = ByteBuffer.allocateDirect(beacon_info_SIZEOF);
             bb.order(ByteOrder.LITTLE_ENDIAN);
             HCIDump.theNativeBuffer = bb;
-            HCIDump.allocScanner(bb, device);
+            HCIDump.allocScanner(bb, device, false);
             eventCount = 1;
             boolean running = true;
             while (running) {

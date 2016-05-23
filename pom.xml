@@ -10,7 +10,7 @@
 
     <groupId>org.jboss.rhiot.beacon</groupId>
     <artifactId>base-beacon-scanner</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
 
     <name>Base Platform Beacon Scanner</name>
     <description>The BLE beacon scanner code that is independent of any framework</description>
