@@ -22,6 +22,7 @@ public class RHIoTTag {
         if(tagData != null) {
             if (tagData.startsWith(SERVICE_DATA_PREFIX)) {
                 tag = new RHIoTTag(tagData.getData());
+                tag.setAddress(info.bdaddr);
             }
         }
         return tag;
